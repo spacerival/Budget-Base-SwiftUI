@@ -7,11 +7,15 @@
 
 import SwiftUI
 
+// The entry point of the app. 
 @main
 struct BudgetBaseApp: App {
+    // @StateObject = "this view CREATES and OWNS this object; keep it alive for the app's whole life."
+    @StateObject private var store = TransactionStore()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView(store: store)
         }
     }
 }
