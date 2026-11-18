@@ -7,6 +7,14 @@
 
 import Foundation
 
+// default values for Zero-Based before user input
+var DEFAULT_LIVING_ESSENTIALS: Double = 1000
+var DEFAULT_FINANCIAL_OBLIGATIONS: Double = 1000
+var DEFAULT_TRANPORTATION: Double = 1000
+var DEFAULT_LIFESTYLE: Double = 1000
+var DEFAULT_GROWTH_HEALTH: Double = 1000
+var DEFAULT_SAVINGS_INVESTMENTS: Double = 1000
+
 enum SpendingGroup: String, CaseIterable, Identifiable {
     case needs = "Needs"
     case wants = "Wants"
@@ -36,7 +44,9 @@ enum ZeroBasedCategory: String, CaseIterable, Identifiable {
     case livingEssenetials = "Living Essentials"
     case financialObligations = "Financial Obligations"
     case transportation = "Transportation"
-    //fill out rest later
+    case lifestyle = "Lifestyle"
+    case growthAndHealth = "Growth & Health"
+    case savingsAndInvestments = "Savings & Investments"
     
     var id: String { rawValue }
     
@@ -46,17 +56,20 @@ enum ZeroBasedCategory: String, CaseIterable, Identifiable {
         case .livingEssenetials: []
         case .financialObligations: []
         case .transportation: []
-            // fill out rest later
+        case .lifestyle: []
+        case .growthAndHealth: []
+        case .savingsAndInvestments: []
         }
     }
     
-    // unsure if we want this
     var defaultAmount: Double {
         switch self {
-        case .livingEssenetials: 0
-        case .financialObligations: 1
-        case .transportation: 2
-            // fill out rest later
+        case .livingEssenetials: DEFAULT_LIVING_ESSENTIALS
+        case .financialObligations: DEFAULT_FINANCIAL_OBLIGATIONS
+        case .transportation: DEFAULT_TRANPORTATION
+        case .lifestyle: DEFAULT_LIFESTYLE
+        case .growthAndHealth: DEFAULT_GROWTH_HEALTH
+        case .savingsAndInvestments: DEFAULT_SAVINGS_INVESTMENTS
         }
     }
 }
