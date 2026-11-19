@@ -8,12 +8,12 @@
 import Foundation
 
 // default values for Zero-Based before user input
-var DEFAULT_LIVING_ESSENTIALS: Double = 1000
-var DEFAULT_FINANCIAL_OBLIGATIONS: Double = 1000
-var DEFAULT_TRANPORTATION: Double = 1000
-var DEFAULT_LIFESTYLE: Double = 1000
-var DEFAULT_GROWTH_HEALTH: Double = 1000
-var DEFAULT_SAVINGS_INVESTMENTS: Double = 1000
+let DEFAULT_LIVING_ESSENTIALS: Double = 1000
+let DEFAULT_FINANCIAL_OBLIGATIONS: Double = 1000
+let DEFAULT_TRANSPORTATION: Double = 1000
+let DEFAULT_LIFESTYLE: Double = 1000
+let DEFAULT_GROWTH_HEALTH: Double = 1000
+let DEFAULT_SAVINGS_INVESTMENTS: Double = 1000
 
 enum SpendingGroup: String, CaseIterable, Identifiable {
     case needs = "Needs"
