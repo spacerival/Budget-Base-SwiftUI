@@ -19,6 +19,38 @@ extension SpendingGroup {
     }
 }
 
+extension TimeRange {
+    var axisLabelFormat: Date.FormatStyle {
+        switch self {
+        case .week: .dateTime.month(.abbreviated).day()
+        case .month: .dateTime.month(.abbreviated)
+        case .year: .dateTime.year()
+        }
+    }
+
+    var axisLabelStride: Int {
+        switch self {
+        case .week: 2
+        case .month: 1
+        case .year: 1
+        }
+    }
+}
+
+extension View {
+    func periodAxis(_ range: TimeRange, dates: [Date]) -> some View {
+        chartXAxis {
+            AxisMarks(preset: .aligned, values: dates) { value in
+                AxisGridLine()
+                if (value.count - 1 - value.index) % range.axisLabelStride == 0 {
+                    AxisValueLabel(format: range.axisLabelFormat)
+                }
+            }
+        }
+        .chartXScale(range: .plotDimension(padding: 24))
+    }
+}
+
 struct SavingsPoint: Identifiable {
     let date: Date
     let total: Double
@@ -135,6 +167,12 @@ struct FiftyThirtyTwentyPlanView: View {
                         }
                     }
                     .chartForegroundStyleScale(domain: SpendingGroup.allCases.map(\.rawValue), range: SpendingGroup.allCases.map(\.tint))
+                    .chartXAxis {
+                        AxisMarks(values: .stride(by: .month)) { _ in
+                            AxisGridLine()
+                            AxisValueLabel(format: TimeRange.month.axisLabelFormat, centered: true)
+                        }
+                    }
                     .chartLegend(.hidden)
                     .frame(height: 160)
                 }
@@ -147,27 +185,32 @@ struct FiftyThirtyTwentyPlanView: View {
                 Text("Budget Progress")
                     .font(.headline)
 
-                ForEach(SpendingGroup.allCases) { group in
-                    let fraction = budget(group) > 0 ? spent(group) / budget(group) : 0
+                if monthlyIncome == 0 {
+                    ContentUnavailableView("No income recorded this month", systemImage: "dollarsign.circle")
+                        .frame(height: 160)
+                } else {
+                    ForEach(SpendingGroup.allCases) { group in
+                        let fraction = budget(group) > 0 ? spent(group) / budget(group) : 0
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
-                            Text(group.rawValue)
-                                .font(.subheadline.bold())
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Text(group.rawValue)
+                                    .font(.subheadline.bold())
 
-                            Text("\(Int((fraction * 100).rounded()))%")
-                                .font(.subheadline.bold())
-                                .foregroundStyle(fraction > 1 ? Color.red : group.tint)
+                                Text("\(Int((fraction * 100).rounded()))%")
+                                    .font(.subheadline.bold())
+                                    .foregroundStyle(fraction > 1 ? Color.red : group.tint)
 
-                            Spacer()
+                                Spacer()
 
-                            Text("\(spent(group).formatted(.currency(code: "USD"))) of \(budget(group).formatted(.currency(code: "USD")))")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                                Text("\(spent(group).formatted(.currency(code: "USD"))) of \(budget(group).formatted(.currency(code: "USD")))")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            ProgressView(value: min(fraction, 1))
+                                .tint(fraction > 1 ? Color.red : group.tint)
                         }
-
-                        ProgressView(value: min(fraction, 1))
-                            .tint(fraction > 1 ? Color.red : group.tint)
                     }
                 }
             }
@@ -229,13 +272,14 @@ struct ZeroBasedPlanView: View {
                 } else {
                     Chart {
                         ForEach(periods) { period in
-                            LineMark(x: .value("Period", period.start, unit: incomeRange.component), y: .value("Amount", period.income))
+                            LineMark(x: .value("Period", period.start), y: .value("Amount", period.income))
                                 .foregroundStyle(by: .value("Type", "Income"))
-                            LineMark(x: .value("Period", period.start, unit: incomeRange.component), y: .value("Amount", period.expenses))
+                            LineMark(x: .value("Period", period.start), y: .value("Amount", period.expenses))
                                 .foregroundStyle(by: .value("Type", "Expenses"))
                         }
                     }
                     .chartForegroundStyleScale(["Income": Color.green, "Expenses": Color.red])
+                    .periodAxis(incomeRange, dates: periods.map(\.start))
                     .frame(height: 160)
                 }
             }
@@ -264,16 +308,21 @@ struct ZeroBasedPlanView: View {
                 } else {
                     Chart(actuals) { item in
                         if breakdownStyle == .bar {
-                            BarMark(x: .value("Spent", item.amount), y: .value("Category", item.name))
+                            BarMark(x: .value("Spent", item.amount), y: .value("Category", item.name), height: .ratio(0.6))
                                 .foregroundStyle(by: .value("Category", item.name))
                         } else {
                             SectorMark(angle: .value("Spent", item.amount), angularInset: 1)
                                 .foregroundStyle(by: .value("Category", item.name))
                         }
                     }
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { _ in
+                            AxisValueLabel()
+                        }
+                    }
                     .chartLegend(breakdownStyle == .pie ? .visible : .hidden)
                     .chartLegend(position: .trailing, alignment: .center)
-                    .frame(height: 160)
+                    .frame(height: breakdownStyle == .bar ? 240 : 160)
                 }
             }
             .padding(12)
@@ -470,11 +519,12 @@ struct PayYourselfFirstPlanView: View {
                         .frame(height: 160)
                 } else {
                     Chart(points) { point in
-                        AreaMark(x: .value("Period", point.date, unit: growthRange.component), y: .value("Saved", point.total))
+                        AreaMark(x: .value("Period", point.date), y: .value("Saved", point.total))
                             .foregroundStyle(Color.green.opacity(0.15))
-                        LineMark(x: .value("Period", point.date, unit: growthRange.component), y: .value("Saved", point.total))
+                        LineMark(x: .value("Period", point.date), y: .value("Saved", point.total))
                             .foregroundStyle(Color.green)
                     }
+                    .periodAxis(growthRange, dates: points.map(\.date))
                     .frame(height: 160)
                 }
             }
@@ -486,7 +536,7 @@ struct PayYourselfFirstPlanView: View {
                 Text("Savings Summary")
                     .font(.headline)
 
-                summaryRow("Total Saved", value: allSavings.total.formatted(.currency(code: "USD")), color: .green)
+                summaryRow("Total Saved All-Time", value: allSavings.total.formatted(.currency(code: "USD")), color: .green)
                 summaryRow("Average per Period", value: averagePerPeriod.formatted(.currency(code: "USD")), color: .primary)
                 summaryRow("Growth Trend", value: growthTrend(periods), color: .primary)
             }
@@ -527,7 +577,7 @@ struct PayYourselfFirstPlanView: View {
     .background(Color(uiColor: .secondarySystemBackground))
 }
 
-#Preview("Pay Yourself First") {
+#Preview("Pay-Yourself-First") {
     ScrollView {
         PayYourselfFirstPlanView(store: TransactionStore(inMemory: true), settings: BudgetSettings(), changePlan: {})
             .padding(16)

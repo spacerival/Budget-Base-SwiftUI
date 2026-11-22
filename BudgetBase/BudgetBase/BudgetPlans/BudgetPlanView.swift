@@ -80,6 +80,7 @@ struct BudgetPlanView: View {
             .padding(16)
             .frame(maxWidth: .infinity)
         }
+        .id(currentPlan)
         .scrollDismissesKeyboard(.interactively)
         .background(Color(uiColor: .secondarySystemBackground))
         .toolbar {
@@ -136,11 +137,11 @@ struct BudgetPlanView: View {
                 Menu {
                     Picker("Budget Plan", selection: $selectedPlan) {
                         ForEach(BudgetPlan.allCases) { plan in
-                            Text(plan.rawValue).tag(plan)
+                            Text(plan.displayName).tag(plan)
                         }
                     }
                 } label: {
-                    Text(selectedPlan.rawValue)
+                    Text(selectedPlan.displayName)
                         .font(.footnote)
                         .frame(maxWidth: .infinity)
                         .frame(height: 34)
