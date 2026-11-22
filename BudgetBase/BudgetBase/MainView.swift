@@ -11,13 +11,14 @@ import SwiftUI
 // Main View: the welcome screen with the app title and Start button.
 struct MainView: View {
     @ObservedObject var store: TransactionStore
+    @ObservedObject var settings: BudgetSettings
 
     // false = show the welcome screen, true = show the tab bar app.
     @State private var hasStarted = false
 
     var body: some View {
         if hasStarted {
-            MainTabView(store: store)
+            MainTabView(store: store, settings: settings)
         } else {
             welcomeScreen
         }
@@ -55,5 +56,5 @@ struct MainView: View {
 }
 
 #Preview {
-    MainView(store: TransactionStore(inMemory: true))
+    MainView(store: TransactionStore(inMemory: true), settings: BudgetSettings())
 }

@@ -13,6 +13,7 @@ import SwiftUI
 // replaces its placeholder line, e.g. Text("History") -> TransactionHistoryView(store: store)
 struct MainTabView: View {
     @ObservedObject var store: TransactionStore
+    @ObservedObject var settings: BudgetSettings
 
     var body: some View {
         TabView {
@@ -20,7 +21,7 @@ struct MainTabView: View {
                 Text("Overview (coming soon)")
             }
             Tab("Budget Plan", systemImage: "chart.line.uptrend.xyaxis") {
-                Text("Budget Plan (coming soon)")
+                BudgetPlanView(store: store, settings: settings)
             }
             Tab("Add", systemImage: "plus.circle") {
                 TransactionInputView(store: store)
@@ -33,5 +34,5 @@ struct MainTabView: View {
 }
 
 #Preview {
-    MainTabView(store: TransactionStore(inMemory: true))
+    MainTabView(store: TransactionStore(inMemory: true), settings: BudgetSettings())
 }
