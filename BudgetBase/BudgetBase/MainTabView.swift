@@ -23,10 +23,10 @@ struct MainTabView: View {
                 Text("Budget Plan (coming soon)")
             }
             Tab("Add", systemImage: "plus.circle") {
-                Text("Add Transaction (coming soon)")
+                TransactionInputView(store: store)
             }
             Tab("History", systemImage: "clipboard") {
-                Text("History (coming soon)")
+                TransactionHistoryView(store: store)
             }
         }
     }
