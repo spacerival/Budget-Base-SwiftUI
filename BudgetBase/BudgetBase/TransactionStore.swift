@@ -87,7 +87,7 @@ class TransactionStore: ObservableObject {
         }
     }
 
-    // MARK: - Helpers
+    // Helpers
 
     // Copy a Transaction struct into a new database object.
     private func insertEntity(for transaction: Transaction) {

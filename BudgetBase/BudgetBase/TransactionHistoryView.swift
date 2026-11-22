@@ -73,27 +73,7 @@ struct TransactionHistoryView: View {
     var body: some View {
         NavigationStack {
             List {
-                // Section 1: the filter and sort menus
-                Section {
-                    Picker("Type", selection: $typeFilter) {
-                        ForEach(TypeFilter.allCases) { option in
-                            Text(option.rawValue).tag(option)
-                        }
-                    }
-                    Picker("Category", selection: $categoryFilter) {
-                        Text("All Categories").tag("")
-                        ForEach(categoryOptions, id: \.self) { name in
-                            Text(name).tag(name)
-                        }
-                    }
-                    Picker("Sort By", selection: $sortOrder) {
-                        ForEach(HistorySortOrder.allCases) { option in
-                            Text(option.rawValue).tag(option)
-                        }
-                    }
-                }
-
-                // Section 2: one row per transaction
+                // One row per transaction
                 Section {
                     if visibleTransactions.isEmpty {
                         Text("No transactions match these filters.")
@@ -111,11 +91,74 @@ struct TransactionHistoryView: View {
                 }
             }
             .listRowSpacing(10)
+            // The filter box sits above the list, inside its own gray rounded box.
+            .safeAreaInset(edge: .top) {
+                filterBox
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                    .background(Color(.systemGroupedBackground))   // same gray as the screen behind
+            }
             .navigationTitle("My Transactions")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("My Transactions")
+                        .font(.title2)
+                        .bold()
+                        .foregroundStyle(Color.brandBlue)
+                }
+            }
         }
     }
 
-    // MARK: - Actions
+    // The Filter Box
+
+    // Three white rows (Type, Category, Sort By) inside a darker gray rounded box.
+    private var filterBox: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Text("Type")
+                Spacer()
+                Picker("Type", selection: $typeFilter) {
+                    ForEach(TypeFilter.allCases) { option in
+                        Text(option.rawValue).tag(option)
+                    }
+                }
+                .labelsHidden()   // the Text on the left is the label
+            }
+            .filterRowStyle()
+
+            HStack {
+                Text("Category")
+                Spacer()
+                Picker("Category", selection: $categoryFilter) {
+                    Text("All Categories").tag("")
+                    ForEach(categoryOptions, id: \.self) { name in
+                        Text(name).tag(name)
+                    }
+                }
+                .labelsHidden()   // the Text on the left is the label
+            }
+            .filterRowStyle()
+
+            HStack {
+                Text("Sort By")
+                Spacer()
+                Picker("Sort By", selection: $sortOrder) {
+                    ForEach(HistorySortOrder.allCases) { option in
+                        Text(option.rawValue).tag(option)
+                    }
+                }
+                .labelsHidden()   // the Text on the left is the label
+            }
+            .filterRowStyle()
+        }
+        .padding(8)
+        .background(Color(.systemGray5))
+        .clipShape(RoundedRectangle(cornerRadius: 28))
+    }
+
+    // Actions
 
     // Called when the user swipes a row left and taps Delete.
     private func deleteTransactions(at offsets: IndexSet) {
@@ -127,7 +170,22 @@ struct TransactionHistoryView: View {
     }
 }
 
-// MARK: - One row in the list
+// Filter Row Style
+
+// The look shared by the three filter rows: white, padded, rounded.
+private extension View {
+    func filterRowStyle() -> some View {
+        self
+            .tint(Color.secondary)          // gray value text
+            .padding(.leading, 16)
+            .padding(.trailing, 4)
+            .padding(.vertical, 4)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+// One Row in the List
 
 // Reusable: your teammate's Overview "Recent Transactions" can use it too.
 struct TransactionRow: View {
