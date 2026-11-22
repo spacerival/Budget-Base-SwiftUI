@@ -47,13 +47,33 @@ struct TransactionInputView: View {
                 }
                 .frame(maxWidth: .infinity)
 
-                // 2. Income / Expense toggle
-                Picker("Type", selection: $type) {
+                // 2. Income / Expense toggle: green when Income is picked, red when Expense is
+                HStack(spacing: 0) {
                     ForEach(TransactionType.allCases) { option in
-                        Text(option.rawValue).tag(option)
+                        let isSelected = (type == option)
+
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                type = option
+                            }
+                        } label: {
+                            Text(option.rawValue)
+                                .font(.subheadline)
+                                .fontWeight(isSelected ? .semibold : .regular)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .foregroundStyle(isSelected ? Color.white : Color.primary)
+                                .background(isSelected ? option.color : Color.clear)
+                                .clipShape(Capsule())
+                                .contentShape(Capsule())   // whole half is tappable, not just the word
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(isSelected ? .isSelected : [])
                     }
                 }
-                .pickerStyle(.segmented)
+                .padding(4)
+                .background(Color(.systemGray6))
+                .clipShape(Capsule())
 
                 // 3. Amount and Date, side by side
                 HStack(alignment: .top, spacing: 16) {
@@ -73,16 +93,26 @@ struct TransactionInputView: View {
                 // 4. Category dropdown
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Category")
-                    Picker("Category", selection: $category) {
-                        Text("Select a category").tag("")
-                        ForEach(type.categories, id: \.self) { name in
-                            Text(name).tag(name)
+                    Menu {
+                        Picker("Category", selection: $category) {
+                            Text("Select a category").tag("")
+                            ForEach(type.categories, id: \.self) { name in
+                                Text(name).tag(name)
+                            }
                         }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(category.isEmpty ? "Select a category" : category)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.footnote)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.systemGray6))
+                        .clipShape(Capsule())
+                        .contentShape(Capsule())
                     }
-                    .pickerStyle(.menu)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.systemGray6))
-                    .clipShape(Capsule())
                 }
 
                 // 5. Description
