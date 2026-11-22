@@ -66,7 +66,7 @@ enum ZeroBasedCategory: String, CaseIterable, Identifiable {
         switch self {
         case .livingEssenetials: DEFAULT_LIVING_ESSENTIALS
         case .financialObligations: DEFAULT_FINANCIAL_OBLIGATIONS
-        case .transportation: DEFAULT_TRANPORTATION
+        case .transportation: DEFAULT_TRANSPORTATION
         case .lifestyle: DEFAULT_LIFESTYLE
         case .growthAndHealth: DEFAULT_GROWTH_HEALTH
         case .savingsAndInvestments: DEFAULT_SAVINGS_INVESTMENTS

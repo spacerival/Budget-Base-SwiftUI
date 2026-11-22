@@ -7,7 +7,7 @@
 
 import Foundation
 import Charts
-Import SwiftUIAttributes
+import SwiftUI
 
 extension SpendingGroup {
     var tint: Color {
@@ -49,7 +49,7 @@ struct CurrentPlanHeader: View {
     }
 }
 
-Struct FiftyThirtyTwentyPlanView: View {
+struct FiftyThirtyTwentyPlanView: View {
     @ObservedObject var store: TransactionStore
     let changePlan: () -> Void
     
@@ -62,6 +62,10 @@ Struct FiftyThirtyTwentyPlanView: View {
     }
     
     private func spent(_ group: SpendingGroup) -> Double {
+        monthExpenses.inCategories(group.categories).total
+    }
+    
+    private func budget(_ group: SpendingGroup) -> Double {
         monthlyIncome * group.share
     }
     
@@ -87,8 +91,9 @@ Struct FiftyThirtyTwentyPlanView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
+                    }
                 }
-            }
+
                 if monthExpenses.isEmpty {
                     ContentUnavailableView("No spending this month", systemImage: "chart.pie.fill")
                         .frame(height: 160)

@@ -67,6 +67,10 @@ extension TransactionStore {
         income.inMonth(of: date).total
     }
     
+    func expensesThisMonth(_ date: Date = .now) -> [Transaction] {
+        expenses.inMonth(of: date)
+    }
+    
     func periods(for range: TimeRange, endingAt date: Date = .now) -> [Period] {
         let calendar = Calendar.current
         guard let current = calendar.dateInterval(of: range.component, for: date) else { return [] }
