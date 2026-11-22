@@ -38,9 +38,15 @@ struct CurrentPlanHeader: View {
                 .frame(maxWidth: .infinity)
             
             HStack(spacing: 12) {
-                Text("Your Current Budget Plan: \(plan.displayName)")
-                    .font(.subheadline.bold())
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Your Current Budget Plan:")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    Text(plan.displayName)
+                        .font(.subheadline.bold())
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Button("Change Plan", action: changePlan)
                     .buttonStyle(.bordered)
@@ -151,7 +157,7 @@ struct FiftyThirtyTwentyPlanView: View {
 
                             Text("\(Int((fraction * 100).rounded()))%")
                                 .font(.subheadline.bold())
-                                .foregroundStyle(fraction > 1 ? Color.red : Color.indigo)
+                                .foregroundStyle(fraction > 1 ? Color.red : group.tint)
 
                             Spacer()
 
@@ -266,6 +272,7 @@ struct ZeroBasedPlanView: View {
                         }
                     }
                     .chartLegend(breakdownStyle == .pie ? .visible : .hidden)
+                    .chartLegend(position: .trailing, alignment: .center)
                     .frame(height: 160)
                 }
             }
@@ -300,18 +307,21 @@ struct ZeroBasedPlanView: View {
                     let goal = settings.allocation(for: category)
                     let difference = goal - actual(category)
                     let isOver = difference < 0
+                    let isExtraSavings = isOver && category == .savingsAndInvestments
+                    let isOverspent = isOver && !isExtraSavings
+                    let tag = isExtraSavings ? "UNDER BUDGET" : (isOverspent ? "OVER BUDGET" : "ON TRACK")
 
                     HStack(spacing: 8) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(category.rawValue)
                                 .font(.footnote.bold())
 
-                            Text(isOver ? "OVER BUDGET" : "ON TRACK")
+                            Text(tag)
                                 .font(.caption2.weight(.semibold))
-                                .foregroundStyle(isOver ? Color.red : Color.green)
+                                .foregroundStyle(isOverspent ? Color.red : Color.green)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 3)
-                                .background((isOver ? Color.red : Color.green).opacity(0.15), in: .rect(cornerRadius: 9))
+                                .background((isOverspent ? Color.red : Color.green).opacity(0.15), in: .rect(cornerRadius: 9))
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -321,9 +331,8 @@ struct ZeroBasedPlanView: View {
                         Text(actual(category).formatted(.currency(code: "USD")))
                             .frame(width: 64, alignment: .trailing)
 
-                        // Always shows a sign: "+$12.00" or "-$12.00".
                         Text(difference.formatted(.currency(code: "USD").sign(strategy: .always())))
-                            .foregroundStyle(isOver ? Color.red : Color.green)
+                            .foregroundStyle(isOverspent ? Color.red : Color.green)
                             .frame(width: 74, alignment: .trailing)
                     }
                     .font(.footnote)
@@ -380,7 +389,6 @@ struct PayYourselfFirstPlanView: View {
         return "Monthly Goal: \(settings.savingsGoal.formatted(.number.grouping(.never)))% (\(goal))"
     }
 
-    // A percentage goal with no income this month is $0, so explain why instead of saying "set a goal".
     private var noGoalMessage: String {
         if !settings.isBlockSavings && monthlyIncome == 0 && settings.savingsGoal > 0 {
             return "No income recorded this month"
@@ -388,7 +396,6 @@ struct PayYourselfFirstPlanView: View {
         return "Set a savings goal in Change Plan"
     }
 
-    // Running total of savings at the end of each period.
     private func growthPoints(_ periods: [Period]) -> [SavingsPoint] {
         guard let first = periods.first else { return [] }
         var running = allSavings.filter { $0.date < first.start }.total
@@ -398,7 +405,6 @@ struct PayYourselfFirstPlanView: View {
         }
     }
 
-    // Change from the previous period to the latest one.
     private func growthTrend(_ periods: [Period]) -> String {
         guard periods.count >= 2 else { return "—" }
         let previous = periods[periods.count - 2].savings

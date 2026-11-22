@@ -14,8 +14,11 @@ class BudgetSettings: ObservableObject {
     @Published var isBlockSavings: Bool {
         didSet { defaults.set(isBlockSavings, forKey: "isBlockSavings") }
     }
-    @Published var savingsGoal: Double {
-        didSet { defaults.set(savingsGoal, forKey: "savingsGoal") }
+    @Published var savingsPercentGoal: Double {
+        didSet { defaults.set(savingsPercentGoal, forKey: "savingsPercentGoal") }
+    }
+    @Published var savingsBlockGoal: Double {
+        didSet { defaults.set(savingsBlockGoal, forKey: "savingsBlockGoal") }
     }
     @Published var allocations: [String: Double] {
         didSet { defaults.set(allocations, forKey: "zeroBasedAllocations") }
@@ -23,12 +26,28 @@ class BudgetSettings: ObservableObject {
     
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        isBlockSavings = defaults.bool(forKey: "isBlockSavings")
-        savingsGoal = defaults.object(forKey: "savingsGoal") as? Double ?? 20
+        let savedIsBlock = defaults.bool(forKey: "isBlockSavings")
+        let legacyGoal = defaults.object(forKey: "savingsGoal") as? Double
+        isBlockSavings = savedIsBlock
+        savingsPercentGoal = defaults.object(forKey: "savingsPercentGoal") as? Double
+            ?? (savedIsBlock ? nil : legacyGoal) ?? 20
+        savingsBlockGoal = defaults.object(forKey: "savingsBlockGoal") as? Double
+            ?? (savedIsBlock ? legacyGoal : nil) ?? 0
         allocations = defaults.dictionary(forKey: "zeroBasedAllocations") as? [String: Double]
         ?? Dictionary(uniqueKeysWithValues: ZeroBasedCategory.allCases.map { ($0.rawValue, $0.defaultAmount) })
     }
     
+    var savingsGoal: Double {
+        get { isBlockSavings ? savingsBlockGoal : savingsPercentGoal }
+        set {
+            if isBlockSavings {
+                savingsBlockGoal = newValue
+            } else {
+                savingsPercentGoal = newValue
+            }
+        }
+    }
+
     var totalAllocated: Double {
         ZeroBasedCategory.allCases.reduce(0) { $0 + allocation(for: $1) }
     }

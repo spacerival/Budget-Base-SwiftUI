@@ -52,6 +52,7 @@ struct BudgetPlanView: View {
     @AppStorage(BudgetPlan.storageKey) private var savedPlan: BudgetPlan?
     @State private var selectedPlan = BudgetPlan(rawValue: UserDefaults.standard.string(forKey: BudgetPlan.storageKey) ?? "") ?? .fiftyThirtyTwenty
     @State private var isChangingPlan = false
+    @FocusState private var focusedField: String?
 
     private var currentPlan: BudgetPlan? {
         isChangingPlan ? nil : savedPlan
@@ -81,6 +82,15 @@ struct BudgetPlanView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Color(uiColor: .secondarySystemBackground))
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+
+                Button("Done") {
+                    focusedField = nil
+                }
+            }
+        }
     }
 
     private var planSetup: some View {
@@ -178,6 +188,7 @@ struct BudgetPlanView: View {
                     .font(.subheadline)
                     .textFieldStyle(.roundedBorder)
                     .keyboardType(.decimalPad)
+                    .focused($focusedField, equals: category.rawValue)
                     .frame(width: 100)
                 }
             }
@@ -215,9 +226,11 @@ struct BudgetPlanView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 NumberField(title: "Savings Goal", value: $settings.savingsGoal)
+                    .id(settings.isBlockSavings)
                     .font(.subheadline)
                     .textFieldStyle(.roundedBorder)
                     .keyboardType(.decimalPad)
+                    .focused($focusedField, equals: "savingsGoal")
                     .frame(width: 80)
             }
         }
