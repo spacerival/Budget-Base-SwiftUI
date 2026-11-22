@@ -104,17 +104,14 @@ struct BudgetPlanView: View {
                 payYourselfFirstSection
             }
 
-            VStack(spacing: 12) {
-                ForEach(BudgetPlan.allCases) { plan in
-                    Button {
-                        choose(plan)
-                    } label: {
-                        Text("View \(plan.rawValue)")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                }
+            // Opens whichever plan is picked in the Budget Plan menu above.
+            Button {
+                choose(selectedPlan)
+            } label: {
+                Text("View")
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.bordered)
 
             learnSection
         }
