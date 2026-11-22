@@ -32,10 +32,9 @@ enum SpendingGroup: String, CaseIterable, Identifiable {
     
     var categories: Set<String> {
         switch self {
-            // fill out after deciding what is what in transaction types
-        case .needs: []
-        case .wants: []
-        case .savings: []
+        case .needs: ["Rent", "Groceries", "Utilities", "Insurance", "Transportation", "Healthcare", "Education"]
+        case .wants: ["Dining Out", "Entertainment/Leisure", "Shopping", "Other"]
+        case .savings: ["Savings Account"]
         }
     }
 }
@@ -52,13 +51,12 @@ enum ZeroBasedCategory: String, CaseIterable, Identifiable {
     
     var categories: Set<String> {
         switch self {
-            // fill out based on transaction types
-        case .livingEssenetials: []
-        case .financialObligations: []
-        case .transportation: []
-        case .lifestyle: []
-        case .growthAndHealth: []
-        case .savingsAndInvestments: []
+        case .livingEssenetials: ["Rent", "Groceries", "Utilities"]
+        case .financialObligations: ["Insurance"]
+        case .transportation: ["Transportation"]
+        case .lifestyle: ["Dining Out", "Entertainment/Leisure", "Shopping", "Other"]
+        case .growthAndHealth: ["Healthcare", "Education"]
+        case .savingsAndInvestments: ["Savings Account"]
         }
     }
     

@@ -104,7 +104,6 @@ struct BudgetPlanView: View {
                 payYourselfFirstSection
             }
 
-            // Opens whichever plan is picked in the Budget Plan menu above.
             Button {
                 choose(selectedPlan)
             } label: {
@@ -172,10 +171,10 @@ struct BudgetPlanView: View {
 
                     Spacer()
 
-                    TextField(category.rawValue, value: Binding(
+                    NumberField(title: category.rawValue, value: Binding(
                         get: { settings.allocation(for: category) },
                         set: { settings.setAllocation($0, for: category) }
-                    ), format: .number)
+                    ))
                     .font(.subheadline)
                     .textFieldStyle(.roundedBorder)
                     .keyboardType(.decimalPad)
@@ -215,7 +214,7 @@ struct BudgetPlanView: View {
                     .font(.subheadline)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                TextField("Savings Goal", value: $settings.savingsGoal, format: .number)
+                NumberField(title: "Savings Goal", value: $settings.savingsGoal)
                     .font(.subheadline)
                     .textFieldStyle(.roundedBorder)
                     .keyboardType(.decimalPad)
@@ -263,6 +262,22 @@ struct BudgetPlanView: View {
 
     private func changePlan() {
         isChangingPlan = true
+    }
+}
+
+private struct NumberField: View {
+    let title: String
+    @Binding var value: Double
+    @State private var text = ""
+
+    var body: some View {
+        TextField(title, text: $text)
+            .onAppear {
+                text = value.formatted(.number.grouping(.never))
+            }
+            .onChange(of: text) {
+                value = Double(text) ?? 0
+            }
     }
 }
 
